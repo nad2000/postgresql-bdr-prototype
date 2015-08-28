@@ -11,7 +11,7 @@ RETURNS uuid LANGUAGE plpythonu AS $$
   from uuid import uuid4
   return uuid4()$$;
 
--- select * from pg_stat_activity 
+-- select * from pg_stat_activity
 CREATE OR REPLACE FUNCTION pa.handle_table_change() RETURNS trigger AS $$
 import time
 import json
@@ -23,7 +23,7 @@ row = old if event=="DELETE" else new
 
 # Increment the version number if the update was local
 if event == "UPDATE" and "version" in row and old["version"] == new["version"]:
-  row["version"] += 1 
+  row["version"] += 1
 
 #TD["table_name"]  ## contains the name of the table on which the trigger occurred.
 #TD["table_schema"]  ## contains the schema of the table on which the trigger occurred.
@@ -53,7 +53,7 @@ rv = plpy.execute(stmt2, [message])
 #with open("/endace/pgsql/update.log", "a") as f:
   #print >>f, "#####:", time.time()
   #print >>f, TD
- 
+
 $$ LANGUAGE plpythonu;
 
 
@@ -68,11 +68,7 @@ CREATE TABLE pa.nodes (
   remote bool DEFAULT false,
   version int DEFAULT 0
 );
-ALTER TABLE pa.nodes  OWNER TO admin;
-GRANT ALL ON TABLE pa.nodes TO admin;
 GRANT SELECT ON TABLE pa.nodes TO public;
-GRANT SELECT ON TABLE pa.nodes TO postgres_ro;
-GRANT SELECT ON TABLE pa.nodes TO postgres_ui;
 
 
 -- DROP TRIGGER IF EXISTS edit_nodes_tr ON pa.nodes;
@@ -107,15 +103,11 @@ CREATE TABLE pa.stores
   archive boolean NOT NULL DEFAULT false,
   created_by character varying,
   temporary boolean NOT NULL DEFAULT false,
-  -- record update propageted from a remote PA 
+  -- record update propageted from a remote PA
   remote boolean DEFAULT false,
   version int DEFAULT 0
 );
-ALTER TABLE pa.stores  OWNER TO admin;
-GRANT ALL ON TABLE pa.stores TO admin;
 GRANT SELECT ON TABLE pa.stores TO public;
-GRANT SELECT ON TABLE pa.stores TO postgres_ro;
-GRANT SELECT ON TABLE pa.stores TO postgres_ui;
 
 -- DROP TRIGGER IF EXISTS edit_stores_tr ON pa.stores;
 CREATE TRIGGER edit_stores_tr
@@ -148,16 +140,16 @@ CREATE TRIGGER delete_erfstores_tr
   FOR EACH ROW
   EXECUTE PROCEDURE pa.handle_table_change();
 
--- 
+--
 -- SELECT pa.push_to_pa();
-CREATE OR REPLACE FUNCTION pa.push_to_pa(pa inet DEFAULT NULL) 
+CREATE OR REPLACE FUNCTION pa.push_to_pa(pa inet DEFAULT NULL)
 RETURNS void
-LANGUAGE plpythonu 
+LANGUAGE plpythonu
 AS $$
 import json
 import socket
 import os
-import uuid 
+import uuid
 import hashlib
 
 stmt1 = plpy.prepare("SELECT pg_notify('pa.changes', $1)", ["text"])
@@ -176,7 +168,7 @@ def send(message, remote=False):
 
   rv = plpy.execute(stmt2, [message])
 
-rv = plpy.execute("SELECT * FROM pa.get_node_attr()") 
+rv = plpy.execute("SELECT * FROM pa.get_node_attr()")
 
 node_id = str(rv[0]["id"])
 ip_addr = str(rv[0]["ip_addr"])
@@ -203,14 +195,14 @@ for row in  plpy.cursor("SELECT * FROM erfstores"):
 $$;
 
 -- SELECT * FROM pa.get_node_attr();
-CREATE OR REPLACE FUNCTION pa.get_node_attr() 
+CREATE OR REPLACE FUNCTION pa.get_node_attr()
 RETURNS TABLE(id text, host_name text, ip_addr text)
-LANGUAGE plpythonu 
+LANGUAGE plpythonu
 AS $$
 import json
 import socket
 import os
-import uuid 
+import uuid
 import hashlib
 
 def get_serial_no():
@@ -229,7 +221,7 @@ def get_id():
 def get_ip_addr():
     s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
     s.connect(("8.8.8.8", 80))
-    ip_addr = s.getsockname()[0] 
+    ip_addr = s.getsockname()[0]
     s.close()
     return ip_addr
 

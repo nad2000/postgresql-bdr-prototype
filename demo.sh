@@ -68,7 +68,7 @@ run "psql -p% -c\"BEGIN; SELECT bdr.bdr_group_join(\
 
 run "psql -p% -c\"SELECT 'NODE'||current_setting('port') AS on_node_name, * FROM bdr.bdr_nodes;\""
 
-run1 "psql -p% -f $HOME/paapp/sql/cr_padb.sql"
+run1 "psql -p% -f cr_padb.sql"
 run "psql -p% -c\"SELECT 'NODE'||current_setting('port') AS on_node_name, table_name FROM information_schema.tables WHERE table_schema='pa'\""
 ###done
 run1 "psql -p% -c\"DELETE FROM pa.nodes; INSERT INTO pa.nodes (host_name, ip_addr) SELECT 'EP'||v::text, ('10.1.1.'||v::text)::inet FROM generate_series(1, 10) AS gs(v);\"" $end_port
